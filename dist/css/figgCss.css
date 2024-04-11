@@ -1,0 +1,67 @@
+/* 
+    Created on : 15/02/2017, 09:34:32 AM
+    Author     : Ivan
+*/
+
+.image-upload > input
+{
+    display: none;
+}
+
+.image-upload img
+{
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+}
+
+.circle-image {
+    width:300px;
+    height:300px;
+    border-radius:160px;
+    border:10px solid #666;
+}
+
+.sweet-figg-title{
+    color: #F9A149 !important;
+}
+
+.sweet-figg-text{
+    color: #003365 !important;
+}
+
+.circle-image-login {
+    width:160px;
+    height:160px;
+    border-radius:160px;
+    border:5px solid #666;
+}
+
+.icon-dashboard {
+    font-size: 70px !important;
+}
+
+
+.bg-simple-textured {
+    background-image: url('../img/simple_textured2.jpeg'); 
+    color: white;
+    width: 100%;
+    height:100%;   
+}
+
+input, select, textarea{
+    color: #000000 !important;
+}
+
+textarea:focus, input:focus {
+    color: #000000 !important;
+}
+
+.input-sm{
+    color: white !important;
+}
+
+.input-sm:focus{
+    color: white !important;
+}
+
