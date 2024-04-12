@@ -38,7 +38,8 @@ if ($soyB === "B") {
                         <div class="col-lg-6">
                             <h1 class="text-aqua">
                                 GAC 
-                                <small> - Solicitud para gastos a comprobar</small>
+                                <!--<small> - Solicitud para gastos a comprobar</small>-->
+                                <small> - Solicitud de pago</small>
                             </h1>
                         </div>
                         <div class="col-lg-6">
@@ -46,21 +47,21 @@ if ($soyB === "B") {
                                 <div class="col-lg-12">
                                     <div class="col-lg-offset-6 col-lg-2">
                                         <?php
-//                                        switch (intval($_SESSION["sgi_id_empresa"])) {
-//                                            case 1:
-//                                                echo '<img src="../dist/img/dirac.jpg" width="157px" alt="alt" id="logo_empresa"/>';
-//                                                break;
-//                                            case 2:
-//                                                echo '<img src="../dist/img/dielem_logo.png" width="157px" alt="alt" id="logo_empresa"/>';
-//                                                break;
-//                                            case 3:
-//                                                echo '<img src="../dist/img/lab_logo.png" width="157px" alt="alt" id="logo_empresa"/>';
-//                                                break;
-//
-//                                            default:
-//                                                echo '<img src="../dist/img/arjion1.png" width="157px" alt="alt" id="logo_empresa"/>';
-//                                                break;
-//                                        }
+                                        switch (intval($_SESSION["sgi_id_empresa"])) {
+                                            case 1:
+                                                echo '<img src="../dist/img/dirac.jpg" width="157px" alt="alt" id="logo_empresa"/>';
+                                                break;
+                                            case 2:
+                                                echo '<img src="../dist/img/dielem_logo.png" width="157px" alt="alt" id="logo_empresa"/>';
+                                                break;
+                                            case 3:
+                                                echo '<img src="../dist/img/lab_logo.png" width="157px" alt="alt" id="logo_empresa"/>';
+                                                break;
+
+                                            default:
+                                                echo '<img src="../dist/img/arjion1.png" width="157px" alt="alt" id="logo_empresa"/>';
+                                                break;
+                                        }
                                         ?>
                                     </div>                                                          
                                 </div>
@@ -91,7 +92,7 @@ if ($soyB === "B") {
 
                                 $usuarios = $model->getInfoUsrsView("id_direccion = " . $_SESSION["sgi_id_area"] . " AND status = 1 ORDER BY nombre ASC");
                                 $proyectos = $model->getProjectsDirac("dashboard = 1");
-                                $tSolicitud = $model->getTipoSolicitudes("estatus = 1 AND id != 1");
+                                $tSolicitud = $model->getTipoSolicitudes("estatus = 1");
                                // $tSolicitud = $model->getTipoSolicitudes("estatus = 1");
                                 ?>
                                 <div class="col-lg-12">

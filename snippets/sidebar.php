@@ -82,11 +82,11 @@
                 <?php
             }
             ?>
-            <li class="treeview">
+<!--            <li class="treeview">
                 <a href="comprobacion_gac.php">
                     <i class="fa fa-ticket"></i> <span>Comprobaci&oacute;n de gastos CC</span> <i class="fa fa-angle-left pull-right"></i>
                 </a>               
-            </li>  
+            </li>  -->
 
 <!--            <li><a href="documentation/index.html"><i class="fa fa-book"></i> <span>Documentation</span></a></li>
 <li class="header">LABELS</li>
