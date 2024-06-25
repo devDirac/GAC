@@ -17,7 +17,7 @@ define("EXTSYS_URL_IMAGES", "http://10.0.8.67/sgi-dirac/sgi-dirac/dist/img/");
 define("EXTSYS_URL_UTILS", "http://10.0.8.67/sgi-dirac/utils/");
 
 define("ID_DIRECCION_GENERAL", "2");//2
-define("ID_DIRECCION_AF", "3");//3
+define("ID_DIRECCION_AF", "19");//3
 define("ID_GERENCIA_FH", "56");//56
 define("ID_JEFE_NOMINA", "5");//5
 define("ID_CP", "19");//16

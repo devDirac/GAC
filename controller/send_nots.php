@@ -289,8 +289,8 @@ switch ($proceso) {
         $usuario = $model->getUsrByIdGral($solicitud["data"][0]["solicita"]);
 
         $subject = "Solicitud de gastos autorizada cargados";
-        $msg = " <p>Ha sido revisada y verificada la solicitu de dgastos a comprobar con la siguiente información, por lo cual se requiere de tu intervención para el cierre de la misma"
-                . "requiere de tu intervención, la información de la solicitud es la siguiente:</p>"
+        $msg = " <p>Ha sido revisada y verificada la solicitud de gastos a comprobar con la siguiente información, por lo cual se requiere de tu intervención para el cierre de la misma,"
+                . "la información de la solicitud es la siguiente:</p>"
                 . "<p>* ID: <b>" . $solicitud["data"][0]["id"] . "</b></p>"
                 . "<p>* Empresa: <b>" . $solicitud["data"][0]["empresa"] . "</b></p>"
                 . "<p>* Solicita: <b>" . $solicitud["data"][0]["solicita_usuario"]["data"][0]["nombre"] . " " . $solicitud["data"][0]["solicita_usuario"]["data"][0]["apellidos"] . "</b></p>"

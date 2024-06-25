@@ -74,8 +74,12 @@ $comprobantes = $model->getComprobantes("id_solicitud = " . $_REQUEST["id"] . " 
                                             <tbody id = "dirac_comprobantes_gac">
                                                 <?php
                                                 $total_importe = 0;
-                                                foreach ($comprobantes["data"] as $key => $s) {
 
+                                                $showBtnSend = 0;
+                                                $showBtnsAuth = 0;
+                                                foreach ($comprobantes["data"] as $key => $s) {
+                                                    $showBtnsAuth++;
+                                                    $showBtnSend++;
 
                                                     $total_importe += $s["importe"];
 
@@ -128,28 +132,34 @@ $comprobantes = $model->getComprobantes("id_solicitud = " . $_REQUEST["id"] . " 
                                                 </tr>
                                                 <tr class="text-info text-bold">
                                                     <td></td>
-                                                    <td>$
+                                                    <td><!--$-->
                                                         <?php
-                                                        $restante = $solicitud["data"][0]["importe"] - $total_importe + $deposito;
-                                                        echo number_format($restante, 2);
+//                                                        $restante = $solicitud["data"][0]["importe"] - $total_importe + $deposito;
+//                                                        echo number_format($restante, 2);
                                                         ?>
                                                     </td>
-                                                    <td>Restante por comprobar</td>
+                                                    <td><!--Restante por comprobar--></td>
                                                     <td colspan="4"></td>
                                                 </tr>
-                                                <tr>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <!--<td></td>-->
-                                                    <td>
-                                                        <button type="button" name="send_comp_ref" onclick="auth(5);" id="send_comp_ref" class="btn btn-flat btn-danger"><i class="fa fa-times"></i> Rechazar comprobantes seleccionados</button>
-                                                    </td>
-                                                    <td>                                                   
-                                                        <button type="button" name="send_comp_auth" onclick="auth(3);" id="send_comp_auth" class="btn btn-flat btn-success"><i class="fa fa-check"></i> Autorizar comprobantes seleccionados</button>
-                                                    </td>
-                                                </tr>
+                                                <?php
+                                                if ($showBtnsAuth !== 0) {
+                                                    ?>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <!--<td></td>-->
+                                                        <td>
+                                                            <button type="button" name="send_comp_ref" onclick="auth(5);" id="send_comp_ref" class="btn btn-flat btn-danger"><i class="fa fa-times"></i> Rechazar comprobantes seleccionados</button>
+                                                        </td>
+                                                        <td>                                                   
+                                                            <button type="button" name="send_comp_auth" onclick="auth(3);" id="send_comp_auth" class="btn btn-flat btn-success"><i class="fa fa-check"></i> Autorizar comprobantes seleccionados</button>
+                                                        </td>
+                                                    </tr>
+                                                    <?php
+                                                }
+                                                ?>
                                                 <tr>
                                                     <td></td>
                                                     <td></td>
@@ -159,8 +169,16 @@ $comprobantes = $model->getComprobantes("id_solicitud = " . $_REQUEST["id"] . " 
                                                     <td>
                                                         <!--<button type="button" onclick="closeReq();" name="closeReq" id="closeReq" class="btn btn-flat btn-warning"><i class="fa fa-lock"></i> Cerrar solicitud</button>-->
                                                     </td>
-                                                    <td>                                                   
-                                                        <!--<button type="button" name="send_comp_auth" onclick="auth(3);" id="send_comp_auth" class="btn btn-flat btn-success"><i class="fa fa-check"></i> Autorizar comprobantes seleccionados</button>-->
+                                                    <td>
+                                                        <?php
+                                                        if ($showBtnSend === 0) {
+                                                            ?>
+                                                            <button type="button" onclick="closeReq1(6);" name="closeReq" id="closeReq" class="btn btn-flat btn-warning"><i class="fa fa-send"></i> Enviar solicitud a DAF para pago</button>
+                                                            <?php
+                                                        }
+                                                        ?>
+
+<!--<button type="button" name="send_comp_auth" onclick="auth(3);" id="send_comp_auth" class="btn btn-flat btn-success"><i class="fa fa-check"></i> Autorizar comprobantes seleccionados</button>-->
                                                     </td>
                                                 </tr>
                                             </tfoot>
@@ -189,10 +207,11 @@ $comprobantes = $model->getComprobantes("id_solicitud = " . $_REQUEST["id"] . " 
         require_once '../snippets/footer.php';
         require_once '../utils/datatables.php';
         ?>
+        <input type="hidden" name="id_solicitud" id="id_solicitud" value="<?php echo $_REQUEST["id"]; ?>" />
     </div><!-- ./wrapper -->    
     <script type="text/javascript" src="<?php echo SYSTEM_PATH ?>dist/js/pages/login.js"></script>
     <script type="text/javascript" src="<?php echo SYSTEM_PATH ?>dist/js/pages/utils.js"></script>
-    <!--<script type="text/javascript" src="<?php // echo SYSTEM_PATH                                                                ?>dist/js/pages/projects.js?v1.0"></script>-->
+    <!--<script type="text/javascript" src="<?php // echo SYSTEM_PATH                                                                        ?>dist/js/pages/projects.js?v1.0"></script>-->
     <script type="text/javascript">
 
                                                             $(document).ready(function () {
@@ -311,6 +330,29 @@ $comprobantes = $model->getComprobantes("id_solicitud = " . $_REQUEST["id"] . " 
                                                                     },
                                                                     success: function (response) {
                                                                         $("#comprobantes_cargados").html(response);
+                                                                    },
+                                                                    error: function (a, b, c) {
+                                                                        console.log(a, b, c);
+                                                                    }
+                                                                });
+                                                            }
+
+                                                            function closeReq1(estatus) {
+//                                                                alert("ALV");
+                                                                $.ajax({
+                                                                    type: "POST",
+                                                                    url: '../controller/controller.php',
+                                                                    data: {id: $("#id_solicitud").val(), evento: 23, estatus: estatus},
+                                                                    dataType: 'json',
+                                                                    beforeSend: function () {//                console.log("Replace project....");
+                                                                        $("#msg3").html('<div class="text-center"><i class="fa fa-spinner fa-spin" style="font-size:48px; color: #F49625"></i><p><b class="text-center"><b></p></div>');
+                                                                    },
+                                                                    success: function (response) {
+                                                                        showAlert(response.msg, "Informaci&oacute;n enviada correctamente", "success", "bounce");
+                                                                        setTimeout(function () {
+                                                                            window.location.href = 'dashboard.php';
+                                                                        }, 1500);
+                                                                        $("#msg3").html('');
                                                                     },
                                                                     error: function (a, b, c) {
                                                                         console.log(a, b, c);

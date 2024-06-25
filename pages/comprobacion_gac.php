@@ -43,7 +43,8 @@ $model = Model::ModelSngltn();
                                                     <div class="form-group form-inline">
                                                         <label>Seleccione solicitud: </label>
                                                         <?php
-                                                        $mis_solicitudes = $model->getSolicitudesGAC("beneficiario = " . $_SESSION["sgi_id_usr"] . " AND estatus = 3 AND id_tipo = 1");
+//                                                        $mis_solicitudes = $model->getSolicitudesGAC("beneficiario = " . $_SESSION["sgi_id_usr"] . " AND estatus = 3 AND id_tipo = 1");
+                                                        $mis_solicitudes = $model->getInfoSolicitudesGAC("(S.solicita = " . $_SESSION["sgi_id_usr"] . " OR S.beneficiario = " . $_SESSION["sgi_id_usr"] . ") AND S.estatus = 3 AND C.tipo = 2");
                                                         echo '<select class="form-control" name="id_solicitud" id="id_solicitud" onchange="getComprobantes();" required="true">';
                                                         echo '<option value="0">Seleccione solicitud</option>';
                                                         foreach ($mis_solicitudes["data"] as $key2 => $ms) {

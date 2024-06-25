@@ -59,7 +59,7 @@ $daf = DAF::DAFSngltn();
                                                 } else {//Si fue aceptado enviamos correo a compras ya al destinatario
                                                     $subject = "Solicitud Aceptada.";
                                                     $msg .= "Ha sido <b>ACEPTADA<b/> por la Direcci&oacute;n de Administraci&oacute;n de Finanzas.";
-                                                    $compras = $daf->getUsrByIdGral(20);
+                                                    $compras = $daf->getUsrByIdGral(1454);
                                                     $destinatario = $daf->getUsrByIdGral($solicitud["data"][0]["id_destinatario"]);
 
 
@@ -86,7 +86,7 @@ $daf = DAF::DAFSngltn();
                                                 } else {//Si fue aceptado enviamos correo a compras
                                                     $subject = "Solicitud Aceptada.";
                                                     $msg .= "Ha sido <b>ACEPTADA<b/> por la Direcci&oacute;n de Administraci&oacute;n de Finanzas.";
-                                                    $compras = $daf->getUsrByIdGral(20);
+                                                    $compras = $daf->getUsrByIdGral(1454);
                                                     $destinatario = $daf->getUsrByIdGral($solicitud["data"][0]["id_destinatario"]);
 
                                                     sendM($subject, $solicitante["data"]->nombre, $msg, $solicitante["data"]->correo);

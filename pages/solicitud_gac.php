@@ -80,7 +80,7 @@ if ($soyB === "B") {
 
                 <div class="box box-warning col-lg-6" >
                     <div class="box-header">
-                        <!--<h3 class="box-title">Detalle<?php // echo $_SESSION["sgi_id_area"];                      ?></h3>-->
+                        <!--<h3 class="box-title">Detalle<?php // echo $_SESSION["sgi_id_area"];                          ?></h3>-->
                     </div><!-- /.box-header -->
                     <!-- form start -->
                     <form method="POST" role="form" name="solicitud_gac" id="solicitud_gac">
@@ -93,7 +93,7 @@ if ($soyB === "B") {
                                 $usuarios = $model->getInfoUsrsView("id_direccion = " . $_SESSION["sgi_id_area"] . " AND status = 1 ORDER BY nombre ASC");
                                 $proyectos = $model->getProjectsDirac("dashboard = 1");
                                 $tSolicitud = $model->getTipoSolicitudes("estatus = 1");
-                               // $tSolicitud = $model->getTipoSolicitudes("estatus = 1");
+                                // $tSolicitud = $model->getTipoSolicitudes("estatus = 1");
                                 ?>
                                 <div class="col-lg-12">
                                     <br /><label for="fecha">Fecha: <?php echo "<b>" . date("Y-m-d H:i:s") . "</b>" ?></label>                                                                                                        
@@ -119,7 +119,7 @@ if ($soyB === "B") {
                                                     <select class="form-control" name="tipo_solicitud" id="tipo_solicitud" onchange="changeTipoSol();">
                                                         <?php
                                                         foreach ($tSolicitud["data"] as $key => $t) {
-                                                            echo '<option value="' . $t["id"] . '">' . $t["nombre"] . '</option>';
+                                                            echo '<option value="' . $t["id"] . '" tt="' . $t["tipo"] . '">' . $t["nombre"] . ' <small>[' . $t["tipo_txt"] . ']</small></option>';
                                                         }
                                                         ?>
                                                     </select>
@@ -373,10 +373,15 @@ require_once '../utils/datatables.php';
                                                                 console.log(response);
                                                                 showAlert(response.msg, "Informaci&oacute;n procesada correctamente", "success", "bounce");
                                                                 $("#send_sgac").prop("disabled", true);
-//                                                                if (parseInt($("#tipo_solicitud").val()) === 5 || parseInt($("#tipo_solicitud").val()) === 6) {
-                                                                $("#divReembolso").show("slow");
-                                                                $("#id_solicitud").val(response.data);
-//                                                                }
+//                                                                if (parseInt($("#tipo_solicitud").val()) !== 5) {
+                                                                if (parseInt($("#tipo_solicitud option:selected").attr("tt")) === 1) {
+                                                                    $("#divReembolso").show("slow");
+                                                                    $("#id_solicitud").val(response.data);
+                                                                } else {
+                                                                    setTimeout(function () {
+                                                                        window.location.href = 'dashboard.php';
+                                                                    }, 1500);
+                                                                }
                                                             } else {
                                                                 showAlert("¡Error!", response.msg, "error", "swing");
                                                             }
@@ -396,9 +401,9 @@ require_once '../utils/datatables.php';
                                             }
 
                                             function changeTipoSol() {
-                                                if (parseInt($("#tipo_solicitud").val()) === 6) {
-                                                    showInput2();
-                                                }
+//                                                if (parseInt($("#tipo_solicitud").val()) === 6) {
+//                                                    showInput2();
+//                                                }
                                             }
 
                                             function enviarArchivosReembolso() {

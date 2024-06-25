@@ -219,6 +219,14 @@ class Model {
                 $allInfo["fecha"] = $infoUsr["fecha"];
                 $allInfo["estatus"] = $infoUsr["estatus"];
                 $allInfo["limite_inferior"] = $infoUsr["limite_inferior"];
+                $allInfo["tipo"] = $infoUsr["tipo"];
+
+                $allInfo["tipo_txt"] = "";
+                if (intval($infoUsr["tipo"]) === 1) {
+                    $allInfo["tipo_txt"] = "Justificación de gastos";
+                } else {
+                    $allInfo["tipo_txt"] = "Gastos a comprobar";
+                }
 
                 $data[] = $allInfo;
             }
@@ -425,6 +433,7 @@ class Model {
             ));
             $id = $this->db->lastInsertId();
             $this->db->Commit();
+            $this->agregarSolBitacora($id, $data["concepto"], 1);
             $this->response["data"] = $id;
             $this->response["errorCode"] = SUCCESS_CODE;
             $this->response["msg"] = SUCCESS;
@@ -584,6 +593,7 @@ class Model {
             ));
             $id = $this->db->lastInsertId();
             $this->db->Commit();
+            $this->agregarSolBitacora($data["id_solicitud"], "Carga de archivo del comprobante #" . $data["id_comprobante"], 5);
             $this->response["data"] = $id;
             $this->response["errorCode"] = SUCCESS_CODE;
             $this->response["msg"] = SUCCESS;
@@ -694,8 +704,10 @@ class Model {
                 date("Y-m-d H:i:s"),
                 $data["estatus"]
             ));
+
             $id = $this->db->lastInsertId();
             $this->db->Commit();
+            $this->agregarSolBitacora($data["id_solicitud"], $data["descripcion"], 5);
             $this->response["data"] = $id;
             $this->response["errorCode"] = SUCCESS_CODE;
             $this->response["msg"] = SUCCESS;
@@ -753,6 +765,27 @@ class Model {
             );
             $this->db->Commit();
 
+            $estatus_bitacora = 0;
+            $desc_bitacora = "";
+            switch (intval($estatus)) {
+                case 0:
+                    $estatus_bitacora = 2;
+                    $desc_bitacora = "Se rechaza solicitud";
+                    break;
+                case 2:
+                    $estatus_bitacora = 4;
+                    $desc_bitacora = "Se envía solicitud a DG";
+                    break;
+                case 3:
+                    $estatus_bitacora = 3;
+                    $desc_bitacora = "Se autoriza solicitud";
+                    break;
+
+                default:
+                    break;
+            }
+
+            $this->agregarSolBitacora($id, $desc_bitacora, $estatus_bitacora);
             $this->response["errorCode"] = SUCCESS_CODE;
             $this->response["msg"] = SUCCESS;
         } catch (Exception $exc) {
@@ -1449,6 +1482,200 @@ class Model {
             }
 
             $this->response["numElems"] = $oOutputs->rowCount();
+            $this->response["data"] = $data;
+            $this->response["errorCode"] = SUCCESS_CODE;
+            $this->response["msg"] = SUCCESS;
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+            $this->response["errorCode"] = ERROR_CODE;
+            $this->response["msg"] = $exc->getMessage();
+        }
+        return $this->response;
+    }
+
+    function agregarSolBitacora($id_solicitud, $descripcion, $evento) {
+        @session_start();
+        $this->db->beginTransaction();
+        try {
+            $query = "INSERT INTO daf_gac_bitacora_solicitud (id_solicitud, id_usuario, descripcion, fecha, evento) VALUES(?,?,?,?,?)";
+            $oResp = $this->db->prepare($query);
+            $oResp->execute(array(
+                $id_solicitud,
+                $_SESSION["sgi_id_usr"],
+                $descripcion,
+                date("Y-m-d H:i:s"),
+                $evento
+            ));
+            $id = $this->db->lastInsertId();
+            $this->db->Commit();
+            $this->response["data"] = $id;
+            $this->response["errorCode"] = SUCCESS_CODE;
+            $this->response["msg"] = SUCCESS;
+        } catch (Exception $exc) {
+//            echo $exc->getMessage();
+            $this->db->rollback();
+            $this->response["errorCode"] = ERROR_CODE;
+            $this->response["msg"] = $exc->getMessage();
+        }
+        return $this->response;
+    }
+
+    function getInfoSolicitudesGAC($q) {
+        try {
+            $query = "SELECT
+                                S.id,
+                                S.solicita,
+                                S.beneficiario,
+                                S.id_proyecto,
+                                S.importe,
+                                S.descripcion,
+                                S.id_tipo,
+                                S.forma_pago,
+                                S.banco,
+                                S.cuenta,
+                                S.clabe,
+                                S.fecha_solicitud,
+                                S.fecha_atencion,
+                                S.fecha_pago,
+                                S.estatus,
+                                S.proyecto_sr,
+                                S.id_empresa,
+                                S.jefe_inmediato,
+                                S.id_director,
+                                S.proveedor,
+                                C.nombre AS nombre_solicitud,
+                                C.descripcion AS descripcion_tipo,
+                                C.tope,
+                                C.id_notificacion,
+                                C.limite_inferior,
+                                C.tipo 
+                        FROM
+                                daf_gac_solicitud S
+                                JOIN daf_gac_cat_solicitud C ON S.id_tipo = C.id 
+                        WHERE " . $q;
+            $oUsr = $this->db->prepare($query);
+            $oUsr->execute();
+            $data = array();
+//            echo $query;
+
+            foreach ($oUsr as $key => $infoUsr) {
+                $allInfo = array();
+                $allInfo["id"] = $infoUsr["id"];
+                $allInfo["solicita"] = $infoUsr["solicita"];
+                $allInfo["beneficiario"] = $infoUsr["beneficiario"];
+                $allInfo["id_proyecto"] = $infoUsr["id_proyecto"];
+                $allInfo["importe"] = $infoUsr["importe"];
+                $allInfo["descripcion"] = $infoUsr["descripcion"];
+                $allInfo["id_tipo"] = $infoUsr["id_tipo"];
+                $allInfo["forma_pago"] = $infoUsr["forma_pago"];
+                $allInfo["fecha_solicitud"] = $infoUsr["fecha_solicitud"];
+                $allInfo["fecha_atencion"] = $infoUsr["fecha_atencion"];
+                $allInfo["fecha_pago"] = $infoUsr["fecha_pago"];
+                $allInfo["estatus"] = $infoUsr["estatus"];
+                $allInfo["proyecto_sr"] = $infoUsr["proyecto_sr"];
+                $allInfo["id_empresa"] = $infoUsr["id_empresa"];
+                $allInfo["jefe_inmediato"] = $infoUsr["jefe_inmediato"];
+
+                $allInfo["banco"] = $infoUsr["banco"];
+                $allInfo["cuenta"] = $infoUsr["cuenta"];
+                $allInfo["clabe"] = $infoUsr["clabe"];
+
+                $allInfo["nombre_solicitud"] = $infoUsr["nombre_solicitud"];
+                $allInfo["descripcion_tipo"] = $infoUsr["descripcion_tipo"];
+                $allInfo["tope"] = $infoUsr["tope"];
+                $allInfo["id_notificacion"] = $infoUsr["id_notificacion"];
+                $allInfo["limite_inferior"] = $infoUsr["limite_inferior"];
+                $allInfo["tipo"] = $infoUsr["tipo"];
+
+                $allInfo["solicita_usuario"] = $this->getInfoUsrsView("id_usuario = " . $infoUsr["solicita"]);
+
+                $allInfo["beneficiario_usuario"] = $this->getInfoUsrsView("id_usuario = " . $infoUsr["beneficiario"]);
+                $allInfo["beneficiario_txt"] = "";
+
+                if ($allInfo["beneficiario_usuario"]["numElems"] > 0) {
+                    $allInfo["beneficiario_txt"] = $allInfo["beneficiario_usuario"]["data"][0]["nombre"] . " " . $allInfo["beneficiario_usuario"]["data"][0]["apellidos"];
+                } else {
+                    $allInfo["beneficiario_txt"] = $infoUsr["proveedor"];
+                }
+
+                $proyecto = $this->getProjectsDirac("id = " . $infoUsr["id_proyecto"]);
+                if ($proyecto["numElems"] > 0) {
+                    $allInfo["proyecto"] = $proyecto["data"][0]["nombre"];
+                } else {
+                    $allInfo["proyecto"] = $infoUsr["proyecto_sr"];
+                }
+
+
+//                $allInfo["tipo_solicitud"] = $this->getTipoSolicitudes("id = " . $infoUsr["id_tipo"]);
+                $allInfo["forma_pago_nombre"] = "";
+
+                switch (intval($infoUsr["forma_pago"])) {
+                    case 1:
+                        $allInfo["forma_pago_nombre"] = "Cheque";
+                        break;
+                    case 2:
+                        $allInfo["forma_pago_nombre"] = "Transferencia bancaria";
+                        break;
+                    default:
+                        $allInfo["forma_pago_nombre"] = "Sin informaci&oacute;n";
+                        break;
+                }
+
+                $allInfo["estatus_nombre"] = "";
+
+                switch (intval($infoUsr["estatus"])) {
+                    case 0:
+                        $allInfo["estatus_nombre"] = "Rechazada";
+                        break;
+                    case 1:
+                        $allInfo["estatus_nombre"] = "Creada/Por autorizar DAF";
+                        break;
+                    case 2:
+                        $allInfo["estatus_nombre"] = "Creada/Por autorizar DG";
+                        break;
+                    case 3:
+                        $allInfo["estatus_nombre"] = "Por revisar/Por pagar";
+                        break;
+                    case 4:
+                        $allInfo["estatus_nombre"] = "Autorizada/Por comprobar";
+                        break;
+                    case 5:
+                        $allInfo["estatus_nombre"] = "Terminada";
+                        break;
+                    case 6:
+                        $allInfo["estatus_nombre"] = "Por pagar administraci&oacute;n";
+                        break;
+                    case 7:
+                        $allInfo["estatus_nombre"] = "Pendiente de autorizar area";
+                        break;
+                    default:
+                        $allInfo["estatus_nombre"] = "Sin estatus disponible";
+                        break;
+                }
+
+                $allInfo["empresa"] = "";
+                switch (intval($infoUsr["id_empresa"])) {
+                    case 1:
+                        $allInfo["empresa"] = "Dirac";
+                        break;
+                    case 2:
+                        $allInfo["empresa"] = "Dielem";
+                        break;
+                    case 3:
+                        $allInfo["empresa"] = "Laboratorio";
+                        break;
+                    case 4:
+                        $allInfo["empresa"] = "Diseno";
+                        break;
+
+                    default:
+                        break;
+                }
+
+                $data[] = $allInfo;
+            }
+
+            $this->response["numElems"] = $oUsr->rowCount();
             $this->response["data"] = $data;
             $this->response["errorCode"] = SUCCESS_CODE;
             $this->response["msg"] = SUCCESS;

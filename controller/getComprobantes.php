@@ -21,98 +21,105 @@ if (is_null($params)) {
     $data = $params;
 }
 
-$comprobantes = $model->getComprobantes("id_solicitud = " . $data["id"]);
-$solicitud = $model->getSolicitudesGAC("id = " . $data["id"]);
-?>
-<table id="comprobantes" class="table dt-responsive nowrap table-responsive text-center">
-    <thead>
-        <tr>
-            <th class="check-header hidden-xs">
-                <label><input id="checkAll" name="checkAll" type="checkbox"><span></span></label>
-            </th>   
-            <!--<th>#</th>-->
-            <th>Importe</th>
-            <th>Descripci&oacute;n</th>
-            <th>Fecha</th>
-            <th>Archivos</th>
-            <th>Estatus</th>
-            <th>Opciones</th>
-        </tr>
-    </thead>
-    <tbody id = "dirac_comprobantes_gac">
-        <?php
-        $total_importe = 0;
-        foreach ($comprobantes["data"] as $key => $s) {
+if (intval($data["id"]) !== 0) {
 
-            $total_importe += $s["importe"];
-            echo '<tr>';
 
-            if (intval($s["estatus"]) === 0) {
-                echo '<td class="check hidden-xs">';
-                echo '<input class="checkbox" type="checkbox" name="idsC[]" id= "' . $s["id"] . '" value= "' . $s["id"] . '"  >';
-                echo '</td>';
-            } else {
-                echo '<td></td>';
-            }
 
-            echo '<td>$' . number_format($s["importe"], 2) . '</td>';
-            echo '<td>' . $s["descripcion"] . '</td>';
-            echo '<td>' . $s["fecha"] . '</td>';
-            echo '<td>';
+    $comprobantes = $model->getComprobantes("id_solicitud = " . $data["id"]);
+    $solicitud = $model->getSolicitudesGAC("id = " . $data["id"]);
+    ?>
+    <table id="comprobantes" class="table dt-responsive nowrap table-responsive text-center">
+        <thead>
+            <tr>
+                <th class="check-header hidden-xs">
+                    <label><input id="checkAll" name="checkAll" type="checkbox"><span></span></label>
+                </th>   
+                <!--<th>#</th>-->
+                <th>Importe</th>
+                <th>Descripci&oacute;n</th>
+                <th>Fecha</th>
+                <th>Archivos</th>
+                <th>Estatus</th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody id = "dirac_comprobantes_gac">
+            <?php
+            $total_importe = 0;
+            foreach ($comprobantes["data"] as $key => $s) {
 
-            $archivos = $model->getArchivosComprobantes("id_solicitud = " . $data["id"] . " AND id_comprobante = " . $s["id"]);
-//            var_dump($archivos);
-            foreach ($archivos["data"] as $key2 => $a) {
-                echo '<a href="' . $a["path"] . $a["nombre"] . '" target="_blank">' . substr($a["nombre"], 0, 20) . '...</a><br />';
-            }
-            echo '</td>';
-            echo '<td>' . $s["estatus_nombre"] . '</td>';
+                $total_importe += $s["importe"];
+                echo '<tr>';
 
-            if (intval($s["estatus"]) === 0) {
+                if (intval($s["estatus"]) === 0) {
+                    echo '<td class="check hidden-xs">';
+                    echo '<input class="checkbox" type="checkbox" name="idsC[]" id= "' . $s["id"] . '" value= "' . $s["id"] . '"  >';
+                    echo '</td>';
+                } else {
+                    echo '<td></td>';
+                }
+
+                echo '<td>$' . number_format($s["importe"], 2) . '</td>';
+                echo '<td>' . $s["descripcion"] . '</td>';
+                echo '<td>' . $s["fecha"] . '</td>';
                 echo '<td>';
-                echo '<button class="btn btn-flat btn-danger" onclick="deleteComp(' . $s["id"] . ');" data-toggle="tooltip" title="Eliminar registro"> <i class="fa fa-times"></i> </button>';
+
+                $archivos = $model->getArchivosComprobantes("id_solicitud = " . $data["id"] . " AND id_comprobante = " . $s["id"]);
+//            var_dump($archivos);
+                foreach ($archivos["data"] as $key2 => $a) {
+                    echo '<a href="' . $a["path"] . $a["nombre"] . '" target="_blank">' . substr($a["nombre"], 0, 20) . '...</a><br />';
+                }
                 echo '</td>';
-            } else {
-                echo '<td></td>';
+                echo '<td>' . $s["estatus_nombre"] . '</td>';
+
+                if (intval($s["estatus"]) === 0) {
+                    echo '<td>';
+                    echo '<button class="btn btn-flat btn-danger" onclick="deleteComp(' . $s["id"] . ');" data-toggle="tooltip" title="Eliminar registro"> <i class="fa fa-times"></i> </button>';
+                    echo '</td>';
+                } else {
+                    echo '<td></td>';
+                }
+                echo '</tr>';
             }
-            echo '</tr>';
+            ?>
+        </tbody>
+        <?php
+        $deposito = 0;
+        $dep = $model->getRegistroCCH("id_solicitud = " . $data["id"]);
+        foreach ($dep["data"] as $key => $d) {
+            $deposito += $d["importe"];
         }
         ?>
-    </tbody>
+        <tfoot>
+            <tr class="text-primary text-bold">
+                <td></td>
+                <td>$<?php echo number_format($total_importe, 2); ?></td>
+                <td>Total</td>
+                <td colspan="4"></td>
+            </tr>
+            <tr class="text-info text-bold">
+                <td></td>
+                <td>$<?php echo number_format($solicitud["data"][0]["importe"] - $total_importe + $deposito, 2); ?></td>
+                <td>Restante por comprobar</td>
+                <td colspan="4"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><input type="hidden" name="evento" id="evento" value="9" /></td>
+                <td colspan="2">
+                    <button name="send_comp" id="send_comp" class="btn btn-flat btn-primary"><i class="fa fa-send"></i> Enviar comprobantes</button>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+    <input type="hidden" name="por_comprobar" id="por_comprobar" value="<?php echo $solicitud["data"][0]["importe"] - $total_importe + $deposito; ?>" />
+    <div id="msg_p_files"></div>
     <?php
-    $deposito = 0;
-    $dep = $model->getRegistroCCH("id_solicitud = " . $data["id"]);
-    foreach ($dep["data"] as $key => $d) {
-        $deposito += $d["importe"];
-    }
-    ?>
-    <tfoot>
-        <tr class="text-primary text-bold">
-            <td></td>
-            <td>$<?php echo number_format($total_importe, 2); ?></td>
-            <td>Total</td>
-            <td colspan="4"></td>
-        </tr>
-        <tr class="text-info text-bold">
-            <td></td>
-            <td>$<?php echo number_format($solicitud["data"][0]["importe"] - $total_importe + $deposito, 2); ?></td>
-            <td>Restante por comprobar</td>
-            <td colspan="4"></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><input type="hidden" name="evento" id="evento" value="9" /></td>
-            <td colspan="2">
-                <button name="send_comp" id="send_comp" class="btn btn-flat btn-primary"><i class="fa fa-send"></i> Enviar comprobantes</button>
-            </td>
-        </tr>
-    </tfoot>
-</table>
-<input type="hidden" name="por_comprobar" id="por_comprobar" value="<?php echo $solicitud["data"][0]["importe"] - $total_importe + $deposito; ?>" />
-<div id="msg_p_files"></div>
+}
+?>
 <script type="text/javascript">
     $(document).ready(function () {
 //        initTable("comprobantes");

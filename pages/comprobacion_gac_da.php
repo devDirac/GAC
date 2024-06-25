@@ -169,10 +169,11 @@ $comprobantes = $model->getComprobantes("id_solicitud = " . $_REQUEST["id"]);
         require_once '../snippets/footer.php';
         require_once '../utils/datatables.php';
         ?>
+        <input type="hidden" name="id_solicitud" id="id_solicitud" value="<?php echo $_REQUEST["id"]; ?>" />
     </div><!-- ./wrapper -->    
     <script type="text/javascript" src="<?php echo SYSTEM_PATH ?>dist/js/pages/login.js"></script>
     <script type="text/javascript" src="<?php echo SYSTEM_PATH ?>dist/js/pages/utils.js"></script>
-    <!--<script type="text/javascript" src="<?php // echo SYSTEM_PATH                                                     ?>dist/js/pages/projects.js?v1.0"></script>-->
+    <!--<script type="text/javascript" src="<?php // echo SYSTEM_PATH                                                       ?>dist/js/pages/projects.js?v1.0"></script>-->
     <script type="text/javascript">
 
                                                             $(document).ready(function () {
@@ -201,6 +202,7 @@ $comprobantes = $model->getComprobantes("id_solicitud = " . $_REQUEST["id"]);
                                                             function auth(estatus) {
                                                                 var data = $("#authCompDA").serializeArray();
                                                                 data.push({"name": "estatus", "value": estatus});
+                                                                data.push({"name": "id_solicitud", "value": $("#id_solicitud").val()});
 
                                                                 var pp = false;
                                                                 $.each(data, function (index, value) {

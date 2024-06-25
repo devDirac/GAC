@@ -15,7 +15,7 @@ class Utils {
         $this->response = array();
     }
 
-    // Método singleton
+// Método singleton
     public static function utlsSngltn() {
         if (!isset(self::$instance)) {
             $Utils = __CLASS__;
@@ -24,7 +24,7 @@ class Utils {
         return self::$instance;
     }
 
-    // Evita que el objeto se pueda clonar
+// Evita que el objeto se pueda clonar
     public function __clone() {
         trigger_error('La clonación de este objeto no está permitida', E_USER_ERROR);
     }
@@ -37,7 +37,7 @@ class Utils {
         return $nuevaFecha->format('Y-m-d H:i:s');
     }
 
-    //Método con str_shuffle() 
+//Método con str_shuffle() 
     public function generateRandomString($length = 6) {
         $characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
         return substr(str_shuffle($characters), 0, $length);
@@ -182,21 +182,23 @@ class Utils {
 //Y por si nos bloquean el contenido HTML (algunos correos lo hacen por seguridad) una versión alternativa en texto plano (también será válida para lectores de pantalla)
         $mail->AltBody = 'This is a plain-text message body';
         foreach ($adjunto as $key => $attach) {
-            //Adjuntamos archivo
+//Adjuntamos archivo
 //            var_dump($attach);
             $mail->AddAttachment($path_adjunto . $attach["nombre"], $attach["nombre"]);
         }
 
 //Enviamos el correo
-        if (!$mail->Send()) {
-            $this->response["errorCode"] = ERROR_CODE;
-            $this->response["msg"] = ERROR;
-        } else {
+        try {
+            $mail->Send();
             $this->response["errorCode"] = SUCCESS_CODE;
             $this->response["msg"] = SUCCESS;
+        } catch (Exception $exc) {
+            $this->response["errorCode"] = ERROR_CODE;
+            $this->response["msg"] = ERROR;
+            echo $exc->getTraceAsString();
+            echo $exc->getMessage();
         }
 
-//        var_dump($mail);
         return $this->response;
     }
 

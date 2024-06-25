@@ -104,7 +104,8 @@ $utils = Utils::utlsSngltn();
                                 //pendientes de pago
                                 $solicitudes_pago = $model->getSolicitudesGAC("(solicita = " . $_SESSION["sgi_id_usr"] . " OR beneficiario = " . $_SESSION["sgi_id_usr"] . ") AND estatus = 3");
                                 //Pendientes de comprobar
-                                $solicitudes_comp = $model->getSolicitudesGAC("(solicita = " . $_SESSION["sgi_id_usr"] . " OR beneficiario = " . $_SESSION["sgi_id_usr"] . ") AND estatus = 4");
+//                                $solicitudes_comp = $model->getSolicitudesGAC("(solicita = " . $_SESSION["sgi_id_usr"] . " OR beneficiario = " . $_SESSION["sgi_id_usr"] . ") AND estatus = 4");
+                                $solicitudes_comp = $model->getInfoSolicitudesGAC("(S.solicita = " . $_SESSION["sgi_id_usr"] . " OR S.beneficiario = " . $_SESSION["sgi_id_usr"] . ") AND S.estatus = 3 AND C.tipo = 2");
                                 ?>
                                 <div class="col-lg-3 col-xs-6">
                                     <!-- small box -->
@@ -185,6 +186,7 @@ $utils = Utils::utlsSngltn();
                                 $admistrativo = $perfiles["data"][1]["valor"];
                                 $cajero = $perfiles["data"][2]["valor"];
                                 $fiscal2 = $perfiles["data"][3]["valor"];
+                                
                                 ?>
 
                                 <!-- SI ERES UN B y tienes otro B abajo --> 
@@ -279,7 +281,8 @@ $utils = Utils::utlsSngltn();
                                 <!-- SI ERES CAJERO  --> 
                                 <?php
                                 if ($_SESSION["sgi_id_usr"] === $cajero || intval($_SESSION["sgi_id_usr"]) === 93 || intval($_SESSION["sgi_id_usr"]) === 102) {
-                                    $pendientes_cajero = $model->getSolicitudesGAC("estatus = 3 ANd id_tipo != 1");
+//                                    $pendientes_cajero = $model->getSolicitudesGAC("estatus = 3 AND id_tipo != 1");
+                                    $pendientes_cajero = $model->getInfoSolicitudesGAC("S.estatus = 3 AND C.tipo = 1");
                                     if ($pendientes_cajero["numElems"] > 0) {
                                         ?>
                                         <div class="col-lg-3 col-xs-6">
@@ -301,8 +304,10 @@ $utils = Utils::utlsSngltn();
                                 ?>
                                 <!-- SI ERES FISCAL  Y TIENES SOLICITUDES QUE AUTORIZAR --> 
                                 <?php
-                                if ($_SESSION["sgi_id_usr"] === $fiscal || $_SESSION["sgi_id_usr"] === $fiscal2 || intval($_SESSION["sgi_id_usr"]) === 93 || intval($_SESSION["sgi_id_usr"]) === 102 || intval($_SESSION["sgi_id_usr"]) === 19) {
-                                    $pendientes_f = $model->getSolicitudesGAC("estatus = 3 AND id_tipo = 1");
+//                                if ($_SESSION["sgi_id_usr"] === $fiscal || $_SESSION["sgi_id_usr"] === $fiscal2 || intval($_SESSION["sgi_id_usr"]) === 93 || intval($_SESSION["sgi_id_usr"]) === 102 || intval($_SESSION["sgi_id_usr"]) === 19) {
+                                if ($_SESSION["sgi_id_usr"] === $fiscal || $_SESSION["sgi_id_usr"] === $fiscal2 || intval($_SESSION["sgi_id_usr"]) === 93 || intval($_SESSION["sgi_id_usr"]) === 102) {
+//                                    $pendientes_f = $model->getSolicitudesGAC("estatus = 3 AND id_tipo = 1");
+                                    $pendientes_f = $model->getInfoSolicitudesGAC("S.estatus = 3 AND C.tipo = 2");
                                     $pendientes_fiscal = 0;
                                     foreach ($pendientes_f["data"] as $key => $pf) {
                                         $comprobantes = $model->getComprobantes("id_solicitud = " . $pf["id"] . " AND estatus = 2");
@@ -333,7 +338,7 @@ $utils = Utils::utlsSngltn();
                                 ?>
                                 <!-- SI ERES DA  Y TIENES COMPROBANTES --> 
                                 <?php
-                                $pendientes_da = $model->getSolicitudesGAC("solicita = " . $_SESSION["sgi_id_usr"] . " AND estatus = 4");
+                                $pendientes_da = $model->getInfoSolicitudesGAC("S.estatus = 3 AND C.tipo = 2");
                                 $pendientes_da_c = 0;
                                 foreach ($pendientes_da["data"] as $key => $pf) {
                                     $comprobantes = $model->getComprobantes("id_solicitud = " . $pf["id"] . " AND estatus = 1");
@@ -742,7 +747,7 @@ $utils = Utils::utlsSngltn();
                                     echo '<td>$' . number_format($s["importe"], 2) . '</td>';
                                     echo '<td>' . $s["descripcion"] . '</td>';
                                     echo '<td>' . $s["forma_pago_nombre"] . '</td>';
-                                    echo '<td>' . $s["tipo_solicitud"]["data"][0]["nombre"] . '</td>';
+                                    echo '<td>' . $s["nombre_solicitud"] . '</td>';
                                     echo '<td>' . $s["fecha_solicitud"] . '</td>';
                                     echo '<td>' . $s["fecha_atencion"] . '</td>';
                                     echo '<td>' . $s["fecha_pago"] . '</td>';
@@ -1286,7 +1291,7 @@ $utils = Utils::utlsSngltn();
                                     echo '<td>$' . number_format($s["importe"], 2) . '</td>';
                                     echo '<td>' . $s["descripcion"] . '</td>';
                                     echo '<td>' . $s["forma_pago_nombre"] . '</td>';
-                                    echo '<td>' . $s["tipo_solicitud"]["data"][0]["nombre"] . '<br />' . $archivos . '</td>';
+                                    echo '<td>' . $s["nombre_solicitud"] . '<br />' . $archivos . '</td>';
                                     echo '<td>' . $s["fecha_solicitud"] . '</td>';
                                     echo '<td>' . $s["fecha_atencion"] . '</td>';
                                     echo '<td>' . $s["fecha_pago"] . '</td>';

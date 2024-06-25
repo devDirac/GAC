@@ -68,6 +68,10 @@ function handler($evento, $data) {
             if ($data["nivel"] === "B") {
                 $data["estatus"] = 7;
             }
+            /* 17.Abril2024 FIGG */
+            if (intval($tipo_solicitud["data"][0]["tipo"]) === 1) {
+                $data["estatus"] = 1;
+            }
 //            var_dump($data);
             $addGAC = $model->agregarSolicitudGAC($data);
 
@@ -131,9 +135,12 @@ function handler($evento, $data) {
             $query = "";
             $id_solicitud = 0;
             $estatus = 0;
+            $estatus_txt = "";
             if ($_SESSION["sgi_nivel"] === "A") {
                 $estatus = 2;
+                $estatus_txt = "Autorizado";
             } else {
+                $estatus_txt = "Rechazado";
                 $estatus = 1;
             }
             foreach ($data["idsC"] as $key => $c) {
@@ -147,6 +154,7 @@ function handler($evento, $data) {
             }
             $comprobantes = $model->getComprobantes($query);
             $solicitud = $model->getSolicitudesGAC("id = " . $comprobantes["data"][0]["id_solicitud"]);
+            $model->agregarSolBitacora($comprobantes["data"][0]["id_solicitud"], "Envío de comprobantes", 4);
 //            var_dump($comprobantes);
 //            var_dump($solicitud);
 //            echo $query;
@@ -215,6 +223,7 @@ function handler($evento, $data) {
                 $foot .= "<p align='center'><a href='http://arjion.com/gac/controller/auth_gac.php?id=" . $id . "&p=2&auth=3'><b style='color: green;'>AUTORIZAR SOLICITUD</b></a></p>";
                 $foot .= "<p align='center'><a href='http://arjion.com/gac/controller/auth_gac.php?id=" . $id . "&p=2&auth=0'><b style='color: red;'>RECHAZAR SOLICITUD</b></a></p>";
 //
+                $model->agregarSolBitacora($id, "Seleccion por parte de DG " . $estado, $auth);
                 if ($flag === 1) {
                     if (intval($solicitud["data"][0]["id_tipo"]) === 5) {//Reembolso
                         $archivos = $model->getArchivosComprobantes("id_solicitud = " . $id);
@@ -244,6 +253,8 @@ function handler($evento, $data) {
 
             $authOutp = $model->authSolicitudGAC($id, $auth);
             if (intval($authOutp["errorCode"]) === 0) {
+                //Registramos en bitacora
+
                 $solicitud = $model->getSolicitudesGAC("id = " . $id);
                 //Actualizar fecha de atencion
                 $model->updateFechaAtt($id);
@@ -264,6 +275,7 @@ function handler($evento, $data) {
                         . "<p>* Forma de pago: <b>" . $solicitud["data"][0]["forma_pago_nombre"] . "</b></p>";
 
                 if (intval($auth) === 2) {
+                    $model->agregarSolBitacora($id, "Envio a Direccion General", $auth);
                     $usuario = $model->getUsrByIdGral(ID_DIRECCION_GENERAL);
                     $msg = " <p>DAF ha solicitado su autorización para la siguiente solicitud de gastos a comprobar, la información es la siguiente:</p>"
                             . "<p>* Empresa: <b>" . $solicitud["data"][0]["empresa"] . "</b></p>"
@@ -287,6 +299,7 @@ function handler($evento, $data) {
                         sendM($subject, $usuario["data"]->nombre, $msg, $usuario["data"]->correo);
                     }
                 } else {
+                    $model->agregarSolBitacora($id, "Seleccion por parte de DAF " . $estado, $auth);
                     $usuario = $model->getUsrByIdGral($solicitud["data"][0]["solicita"]);
                     if (intval($solicitud["data"][0]["id_tipo"]) === 5) {//Reembolso
                         $archivos = $model->getArchivosComprobantes("id_solicitud = " . $id);
@@ -317,6 +330,7 @@ function handler($evento, $data) {
                 }
                 //Actualizamos estatus de comprobante
                 $auth_da = $model->updateEstatusComp($c, $data["estatus"]);
+                $model->agregarSolBitacora($data["id_solicitud"], "Envío de comprobantes", 4);
             }
             $comprobantes = $model->getComprobantes($query);
             $solicitud = $model->getSolicitudesGAC("id = " . $comprobantes["data"][0]["id_solicitud"]);
@@ -330,6 +344,7 @@ function handler($evento, $data) {
                 if (intval($data["estatus"]) === 5) {
                     $estatus_comp = "Rechazado(s)";
                 }
+                $model->agregarSolBitacora($data["id_solicitud"], "Validación de comprobantes por parte de DA con estatus " . $estatus_comp, $data["estatus"]);
                 include_once './send_nots.php';
             }
             echo json_encode($auth_da);
@@ -363,6 +378,7 @@ function handler($evento, $data) {
                 if (intval($data["estatus"]) === 5) {
                     $estatus_comp = "Rechazado(s)";
                 }
+                $model->agregarSolBitacora($comprobantes["data"][0]["id_solicitud"], "Validación de comprobantes por parte del RF con estatus " . $estatus_comp, $data["estatus"]);
                 include_once './send_nots.php';
             }
 
@@ -415,6 +431,7 @@ function handler($evento, $data) {
                     . "<p>* Forma de pago: <b>" . $solicitud["data"][0]["forma_pago_nombre"] . "</b></p>";
 
             $send = sendM2($usuario["data"]->correo, $usuario["data"]->nombre, $subject, $msg2 . $msg3, $path, $archivos["data"]);
+
             echo json_encode($send);
             break;
         case 17: //Autoriza o rechaza DG
@@ -490,6 +507,7 @@ function handler($evento, $data) {
             $msg .= "<p align='center'><a href='http://arjion.com/gac/controller/auth_gac.php?id=" . $data["id"] . "&p=2&auth=2'><b style='color: aqua;'>ENVIAR A DG PARA AUTORIZACION</b></a></p>";
             $msg .= "<p align='center'><a href='http://arjion.com/gac/controller/auth_gac.php?id=" . $data["id"] . "&p=2&auth=0'><b style='color: red;'>RECHAZAR SOLICITUD</b></a></p>";
 //
+            $model->agregarSolBitacora($data["id"], "Direccion de area " . $estado . " solicitud", $data["auth"]);
             if ($flag === 1) {
 //                if (intval($solicitud["data"][0]["id_tipo"]) === 5) {//Reembolso
                 $usuario = $model->getUsrByIdGral(ID_DIRECCION_AF);
@@ -513,7 +531,16 @@ function handler($evento, $data) {
             $auth_caj = NULL;
             $query = "";
             $id_solicitud = 0;
+
+            $estatus_txt = "";
+            if (intval($data["estatus"]) === 2) {
+                $estatus_txt = "Autorizado";
+            } else {
+                $estatus_txt = "Rechazado";
+            }
+
             foreach ($data["idsC"] as $key => $c) {
+                $model->agregarSolBitacora($data["id_solicitud"], "Se valida comprobante #" . $c . "# con estatus de " . $estatus_txt, $data["estatus"]);
                 if (end($data["idsC"]) === $c) {
                     $query .= " id = " . $c;
                 } else {
@@ -553,6 +580,7 @@ function handler($evento, $data) {
             $solicitud = $model->getSolicitudesGAC("id = " . $data["id"]);
 //            var_dump($solicitud);
             $authOutp = $model->authSolicitudGAC($data["id"], $data["estatus"]);
+            $model->agregarSolBitacora($data["id"], "Se envía solicitud a DAF para pago", $data["estatus"]);
             if (intval($authOutp["errorCode"] === 0)) {
                 $proceso = 10;
                 include_once './send_nots.php';
@@ -563,6 +591,7 @@ function handler($evento, $data) {
             $solicitud = $model->getSolicitudesGAC("id = " . $data["id"]);
             $updatePago = null;
             $updatePago = $model->updateFechaPagR($data["id"]);
+            $model->agregarSolBitacora($data["id"], "Se realiza pago y/o cierre de solicitud", $data["estatus"]);
             if (intval($updatePago["errorCode"]) === 0) {
                 //Enviamos notitificacion a DA de solicitud
                 $proceso = 4;

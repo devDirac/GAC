@@ -73,6 +73,9 @@ $comprobantes = $model->getArchivosComprobantes("id_solicitud = " . $_REQUEST["i
                                             </thead>
                                             <tbody id = "dirac_comprobantes_gac">
                                                 <?php
+                                                $showBtnSend = 0;
+                                                $showBtnsAuth = 0;
+
                                                 foreach ($comprobantes["data"] as $key => $s) {
                                                     $estatus_comprobante = $s["estatus"];
                                                     $estatus_txt = "";
@@ -91,8 +94,10 @@ $comprobantes = $model->getArchivosComprobantes("id_solicitud = " . $_REQUEST["i
                                                         echo '<td class="check hidden-xs">';
                                                         echo '<input class="checkbox" type="checkbox" name="idsC[]" id= "' . $s["id"] . '" value= "' . $s["id"] . '"  >';
                                                         echo '</td>';
+                                                        $showBtnsAuth++;
                                                     } else {
                                                         echo '<td></td>';
+                                                        $showBtnSend++;
                                                     }
 
                                                     echo '<td>' . $s["nombre"] . '</td>';
@@ -133,10 +138,22 @@ $comprobantes = $model->getArchivosComprobantes("id_solicitud = " . $_REQUEST["i
                                                     <td></td>
                                                     <td></td>
                                                     <td>
-                                                        <button type="button" name="send_comp_ref" onclick="auth(0);" id="send_comp_ref" class="btn btn-flat btn-danger"><i class="fa fa-times"></i> Rechazar</button>
+                                                        <?php
+                                                        if ($showBtnsAuth > 0) {
+                                                            ?>
+                                                            <button type="button" name="send_comp_ref" onclick="auth(0);" id="send_comp_ref" class="btn btn-flat btn-danger"><i class="fa fa-times"></i> Rechazar</button>
+                                                            <?php
+                                                        }
+                                                        ?>
                                                     </td>
-                                                    <td>                                                   
-                                                        <button type="button" name="send_comp_auth" onclick="auth(2);" id="send_comp_auth" class="btn btn-flat btn-success"><i class="fa fa-check"></i> Autorizar</button>
+                                                    <td>  
+                                                        <?php
+                                                        if ($showBtnsAuth > 0) {
+                                                            ?>
+                                                            <button type="button" name="send_comp_auth" onclick="auth(2);" id="send_comp_auth" class="btn btn-flat btn-success"><i class="fa fa-check"></i> Autorizar</button>
+                                                            <?php
+                                                        }
+                                                        ?>
                                                     </td>
                                                 </tr>                                                
                                                 <tr>
@@ -145,7 +162,13 @@ $comprobantes = $model->getArchivosComprobantes("id_solicitud = " . $_REQUEST["i
                                                     <td></td>
                                                     <td></td>
                                                     <td>
-                                                        <button type="button" onclick="closeReq(6);" name="btn_closeReq" id="btn_closeReq" class="btn btn-flat btn-warning"><i class="fa fa-bitcoin"></i> Enviar solicitud a DAF para pago</button>
+                                                        <?php
+                                                        if ($showBtnSend > 0) {
+                                                            ?>
+                                                            <button type="button" onclick="closeReq(6);" name="btn_closeReq" id="btn_closeReq" class="btn btn-flat btn-warning"><i class="fa fa-bitcoin"></i> Enviar solicitud a DAF para pago</button>
+                                                            <?php
+                                                        }
+                                                        ?>
                                                     </td>
 <!--                                                    <td>                                                   
                                                         <button type="button" name="send_comp_auth" onclick="auth(3);" id="send_comp_auth" class="btn btn-flat btn-success"><i class="fa fa-check"></i> Autorizar comprobantes seleccionados</button>
@@ -155,7 +178,7 @@ $comprobantes = $model->getArchivosComprobantes("id_solicitud = " . $_REQUEST["i
                                         </table>
                                         <div id="msg"></div>
                                         <input type="hidden" name="restante" id="restante" value="<?php echo $restante; ?>" /> 
-                                        <input type="hidden" name="$total_importe" id="total_importe" value="<?php echo $total_importe; ?>" /> 
+                                        <input type="hidden" name="total_importe" id="total_importe" value="<?php echo $total_importe; ?>" /> 
 
                                     </form>
                                 </div>
@@ -182,155 +205,156 @@ $comprobantes = $model->getArchivosComprobantes("id_solicitud = " . $_REQUEST["i
     </div><!-- ./wrapper -->    
     <script type="text/javascript" src="<?php echo SYSTEM_PATH ?>dist/js/pages/login.js"></script>
     <script type="text/javascript" src="<?php echo SYSTEM_PATH ?>dist/js/pages/utils.js"></script>
-    <!--<script type="text/javascript" src="<?php // echo SYSTEM_PATH                                                                         ?>dist/js/pages/projects.js?v1.0"></script>-->
+    <!--<script type="text/javascript" src="<?php // echo SYSTEM_PATH                                                                              ?>dist/js/pages/projects.js?v1.0"></script>-->
     <script type="text/javascript">
 
-                                                            $(document).ready(function () {
+                                                                $(document).ready(function () {
 
-                                                                //                                                                initTable('comprobantes');
-                                                                $('#checkAll').click(function () {
-                                                                    //var oTable = $("#comprobantes").dataTable();
-                                                                    //var allPages = oTable.fnGetNodes();
-                                                                    if (this.checked) {
-                                                                        $('.checkbox').each(function () {
-                                                                            //this.checked = true;
-                                                                            //$('input[type="checkbox"]', allPages).prop('checked', true);
-                                                                            $('#comprobantes input[type="checkbox"]').prop('checked', true);
+                                                                    //                                                                initTable('comprobantes');
+                                                                    $('#checkAll').click(function () {
+                                                                        //var oTable = $("#comprobantes").dataTable();
+                                                                        //var allPages = oTable.fnGetNodes();
+                                                                        if (this.checked) {
+                                                                            $('.checkbox').each(function () {
+                                                                                //this.checked = true;
+                                                                                //$('input[type="checkbox"]', allPages).prop('checked', true);
+                                                                                $('#comprobantes input[type="checkbox"]').prop('checked', true);
+                                                                            });
+                                                                        } else {
+                                                                            $('.checkbox').each(function () {
+                                                                                // this.checked = false;
+                                                                                //$('input[type="checkbox"]', allPages).prop('checked', false);
+                                                                                $('input[type="checkbox"]').prop('checked', false);
+                                                                            });
+                                                                        }
+                                                                    });
+
+                                                                });
+
+                                                                function auth(estatus) {
+                                                                    var data = $("#authCompDA").serializeArray();
+                                                                    data.push({"name": "estatus", "value": estatus});
+                                                                    data.push({"name": "id_solicitud", "value": $("#id_solicitud").val()});
+
+                                                                    var pp = false;
+                                                                    $.each(data, function (index, value) {
+                                                                        if (value.name === "idsC[]") {
+                                                                            pp = true;
+                                                                        }
+                                                                    });
+                                                                    console.log("PP: " + pp);
+                                                                    if (pp === true) {
+                                                                        console.log(data);
+                                                                        $.ajax({
+                                                                            type: "POST",
+                                                                            url: '../controller/controller.php',
+                                                                            data: data,
+                                                                            dataType: 'json',
+                                                                            beforeSend: function () {//                console.log("Replace project....");
+                                                                                $("#msg").html('<div class="text-center"><i class="fa fa-spinner fa-spin" style="font-size:48px; color: #F49625"></i><p><b class="text-center"><b></p></div>');
+                                                                                $("#send_comp_ref").prop("disabled", true);
+                                                                                $("#send_comp_auth").prop("disabled", true);
+                                                                            },
+                                                                            success: function (response) {
+                                                                                if (response.errorCode === 0) {
+                                                                                    showAlert(response.msg, "Informaci&oacute;n actualizada correctamente", "success", "bounce");
+                                                                                    $("#msg").html('');
+                                                                                    setTimeout(function () {
+                                                                                        window.location.reload();
+                                                                                    }, 1500);
+                                                                                } else {
+                                                                                    showAlert("¡Error!", response.msg, "error", "swing");
+                                                                                }
+                                                                            },
+                                                                            error: function (a, b, c) {
+                                                                                console.log(a, b, c);
+                                                                            }
                                                                         });
                                                                     } else {
-                                                                        $('.checkbox').each(function () {
-                                                                            // this.checked = false;
-                                                                            //$('input[type="checkbox"]', allPages).prop('checked', false);
-                                                                            $('input[type="checkbox"]').prop('checked', false);
-                                                                        });
+                                                                        showAlert("¡Error!", "Favor de seleccionar minimo un comprobante", "error", "swing");
                                                                     }
-                                                                });
+                                                                }
 
-                                                            });
-
-                                                            function auth(estatus) {
-                                                                var data = $("#authCompDA").serializeArray();
-                                                                data.push({"name": "estatus", "value": estatus});
-
-                                                                var pp = false;
-                                                                $.each(data, function (index, value) {
-                                                                    if (value.name === "idsC[]") {
-                                                                        pp = true;
-                                                                    }
-                                                                });
-                                                                console.log("PP: " + pp);
-                                                                if (pp === true) {
-                                                                    console.log(data);
+                                                                function initTable(table) {
+                                                                    $("#" + table).dataTable({
+                                                                        "dom": 'Bfrtip',
+                                                                        "buttons": [
+                                                                            'colvis', 'csv', 'excel', 'pdf', 'print'
+                                                                                    //                            'excel', 'pdf', 'print'
+                                                                        ],
+                                                                        "bPaginate": true,
+                                                                        "bLengthChange": true,
+                                                                        "bFilter": true,
+                                                                        "bSort": true,
+                                                                        "bInfo": true,
+                                                                        "bAutoWidth": false,
+                                                                        "oLanguage": {
+                                                                            "sProcessing": "Procesando...",
+                                                                            "sLengthMenu": "Mostrar _MENU_ registros",
+                                                                            "sZeroRecords": "No se encontraron resultados",
+                                                                            "sEmptyTable": "Ningún dato disponible en esta tabla",
+                                                                            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                                                                            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                                                                            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+                                                                            "sInfoPostFix": "",
+                                                                            "sSearch": "Buscar:",
+                                                                            "sUrl": "",
+                                                                            "sInfoThousands": ",",
+                                                                            "sLoadingRecords": "Cargando...",
+                                                                            "sButtonText": "Imprimir",
+                                                                            "oPaginate": {
+                                                                                "sFirst": "Primero",
+                                                                                "sLast": "Último",
+                                                                                "sNext": "Siguiente",
+                                                                                "sPrevious": "Anterior"
+                                                                            },
+                                                                            "buttons": {
+                                                                                "print": "Imprimir",
+                                                                                "colvis": "Columnas mostradas"
+                                                                            }
+                                                                        }
+                                                                    });
+                                                                }
+                                                                //                                        -----------------------------------------------------------------------------------
+                                                                function getComprobantes() {
                                                                     $.ajax({
                                                                         type: "POST",
                                                                         url: '../controller/controller.php',
-                                                                        data: data,
-                                                                        dataType: 'json',
+                                                                        data: {id: $("#id_solicitud").val()},
+                                                                        dataType: 'html',
                                                                         beforeSend: function () {//                console.log("Replace project....");
-                                                                            $("#msg").html('<div class="text-center"><i class="fa fa-spinner fa-spin" style="font-size:48px; color: #F49625"></i><p><b class="text-center"><b></p></div>');
-                                                                            $("#send_comp_ref").prop("disabled", true);
-                                                                            $("#send_comp_auth").prop("disabled", true);
+                                                                            $("#comprobantes_cargados").html('<div class="text-center"><i class="fa fa-spinner fa-spin" style="font-size:48px; color: #F49625"></i><p><b class="text-center"><b></p></div>');
                                                                         },
                                                                         success: function (response) {
-                                                                            if (response.errorCode === 0) {
-                                                                                showAlert(response.msg, "Informaci&oacute;n actualizada correctamente", "success", "bounce");
-                                                                                $("#msg").html('');
-                                                                                setTimeout(function () {
-                                                                                    window.location.reload();
-                                                                                }, 1500);
-                                                                            } else {
-                                                                                showAlert("¡Error!", response.msg, "error", "swing");
-                                                                            }
+                                                                            $("#comprobantes_cargados").html(response);
                                                                         },
                                                                         error: function (a, b, c) {
                                                                             console.log(a, b, c);
                                                                         }
                                                                     });
-                                                                } else {
-                                                                    showAlert("¡Error!", "Favor de seleccionar minimo un comprobante", "error", "swing");
                                                                 }
-                                                            }
 
-                                                            function initTable(table) {
-                                                                $("#" + table).dataTable({
-                                                                    "dom": 'Bfrtip',
-                                                                    "buttons": [
-                                                                        'colvis', 'csv', 'excel', 'pdf', 'print'
-                                                                                //                            'excel', 'pdf', 'print'
-                                                                    ],
-                                                                    "bPaginate": true,
-                                                                    "bLengthChange": true,
-                                                                    "bFilter": true,
-                                                                    "bSort": true,
-                                                                    "bInfo": true,
-                                                                    "bAutoWidth": false,
-                                                                    "oLanguage": {
-                                                                        "sProcessing": "Procesando...",
-                                                                        "sLengthMenu": "Mostrar _MENU_ registros",
-                                                                        "sZeroRecords": "No se encontraron resultados",
-                                                                        "sEmptyTable": "Ningún dato disponible en esta tabla",
-                                                                        "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-                                                                        "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-                                                                        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-                                                                        "sInfoPostFix": "",
-                                                                        "sSearch": "Buscar:",
-                                                                        "sUrl": "",
-                                                                        "sInfoThousands": ",",
-                                                                        "sLoadingRecords": "Cargando...",
-                                                                        "sButtonText": "Imprimir",
-                                                                        "oPaginate": {
-                                                                            "sFirst": "Primero",
-                                                                            "sLast": "Último",
-                                                                            "sNext": "Siguiente",
-                                                                            "sPrevious": "Anterior"
-                                                                        },
-                                                                        "buttons": {
-                                                                            "print": "Imprimir",
-                                                                            "colvis": "Columnas mostradas"
-                                                                        }
-                                                                    }
-                                                                });
-                                                            }
-                                                            //                                        -----------------------------------------------------------------------------------
-                                                            function getComprobantes() {
-                                                                $.ajax({
-                                                                    type: "POST",
-                                                                    url: '../controller/controller.php',
-                                                                    data: {id: $("#id_solicitud").val()},
-                                                                    dataType: 'html',
-                                                                    beforeSend: function () {//                console.log("Replace project....");
-                                                                        $("#comprobantes_cargados").html('<div class="text-center"><i class="fa fa-spinner fa-spin" style="font-size:48px; color: #F49625"></i><p><b class="text-center"><b></p></div>');
-                                                                    },
-                                                                    success: function (response) {
-                                                                        $("#comprobantes_cargados").html(response);
-                                                                    },
-                                                                    error: function (a, b, c) {
-                                                                        console.log(a, b, c);
-                                                                    }
-                                                                });
-                                                            }
-
-                                                            function closeReq(estatus) {
+                                                                function closeReq(estatus) {
 //                                                                alert("ALV");
-                                                                $.ajax({
-                                                                    type: "POST",
-                                                                    url: '../controller/controller.php',
-                                                                    data: {id: $("#id_solicitud").val(), evento: 23, estatus: estatus},
-                                                                    dataType: 'json',
-                                                                    beforeSend: function () {//                console.log("Replace project....");
-                                                                        $("#msg3").html('<div class="text-center"><i class="fa fa-spinner fa-spin" style="font-size:48px; color: #F49625"></i><p><b class="text-center"><b></p></div>');
-                                                                    },
-                                                                    success: function (response) {
-                                                                        showAlert(response.msg, "Informaci&oacute;n enviada correctamente", "success", "bounce");
-                                                                        setTimeout(function () {
-                                                                            window.location.href = 'dashboard.php';
-                                                                        }, 1500);
-                                                                        $("#msg3").html('');
-                                                                    },
-                                                                    error: function (a, b, c) {
-                                                                        console.log(a, b, c);
-                                                                    }
-                                                                });
-                                                            }
+                                                                    $.ajax({
+                                                                        type: "POST",
+                                                                        url: '../controller/controller.php',
+                                                                        data: {id: $("#id_solicitud").val(), evento: 23, estatus: estatus},
+                                                                        dataType: 'json',
+                                                                        beforeSend: function () {//                console.log("Replace project....");
+                                                                            $("#msg3").html('<div class="text-center"><i class="fa fa-spinner fa-spin" style="font-size:48px; color: #F49625"></i><p><b class="text-center"><b></p></div>');
+                                                                        },
+                                                                        success: function (response) {
+                                                                            showAlert(response.msg, "Informaci&oacute;n enviada correctamente", "success", "bounce");
+                                                                            setTimeout(function () {
+                                                                                window.location.href = 'dashboard.php';
+                                                                            }, 1500);
+                                                                            $("#msg3").html('');
+                                                                        },
+                                                                        error: function (a, b, c) {
+                                                                            console.log(a, b, c);
+                                                                        }
+                                                                    });
+                                                                }
     </script>
 </body>
