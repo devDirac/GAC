@@ -68,6 +68,9 @@ function handler($evento, $data) {
             if ($data["nivel"] === "B") {
                 $data["estatus"] = 7;
             }
+            if ($data["nivel"] === "A") {
+                $data["estatus"] = 1;
+            }
             /* 17.Abril2024 FIGG */
             if (intval($tipo_solicitud["data"][0]["tipo"]) === 1) {
                 $data["estatus"] = 1;
